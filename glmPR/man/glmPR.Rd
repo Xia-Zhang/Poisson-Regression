@@ -22,10 +22,10 @@ glmPR(X, ...)
   % \item{s}{a constant scalar parameter to control the influence of L1-Norm}
 }
 \value{
-  return the glmPR object, which can be use to predict.
+  return the glmPR object, which can be use to predict. Be attention taht the return value of predict function don't need to be exp().
 }
 \details{
-  This function use the lbfgs algorithm, which is implemented in the C++ lib liblbfgs, to optimaze the objective function.
+  This function use the lbfgs algorithm, which is implemented in the C++ lib liblbfgs, to optimize the objective function.
 }
 \references{
   liblbfgs, \url{http://www.chokkan.org/software/liblbfgs/} a library of Limited-memory Broyden-Fletcher-Goldfarb-Shanno (L-BFGS).

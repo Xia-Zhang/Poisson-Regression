@@ -74,11 +74,11 @@ List glmPR(const arma::mat& X, const arma::colvec& y, double s = 0.0) {
     int M = X.n_rows, N = X.n_cols;
 
     arma::colvec coef = getCoef(X, y, s);
-    arma::colvec res  = y - X*coef;
+    arma::colvec res  = y - exp(X*coef);	// exp
+    //arma::colvec res  = y - X*coef;
 
-    double s2 = std::inner_product(res.begin(), res.end(), res.begin(), 0.0)/(M - N);
-
-    arma::colvec std_err = arma::sqrt(s2 * arma::diagvec(arma::pinv(arma::trans(X)*X)));
+    double tmp = std::inner_product(res.begin(), res.end(), res.begin(), 0.0)/(M - N);
+    arma::colvec std_err = arma::sqrt(tmp * arma::diagvec(arma::pinv(arma::trans(X)*X)));
 
     return List::create(Named("coefficients") = coef,
                         Named("stderr")       = std_err,

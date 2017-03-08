@@ -37,7 +37,7 @@ print.glmPR <- function(x, ...) {
     cat("\nCall:\n")
     print(x$call)
     cat("\nCoefficients:\n")
-    print(x$coefficients, digits=6)
+    print(round(x$coefficients, 6))
 }
 
 summary.glmPR <- function(object, ...) {
@@ -111,6 +111,9 @@ predict.glmPR <- function(object, newx = NULL, ...) {
     if (is.null(newx)) {
         y <- fitted(object)
     } else {
+        if (is.vector(newx)) {
+            newx <- matrix(newx, nrow = 1)
+        }
         if (!is.matrix(newx)) {
             stop("The newx is not matrix!")
         }

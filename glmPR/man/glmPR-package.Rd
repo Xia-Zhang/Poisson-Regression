@@ -6,7 +6,7 @@
 L1-penalized Poisson Regression, completed by C++ and Rcpp. This is test solution of the 2017 GSOC project Graphical Models for Mixed Multi Modal Data \url{https://github.com/rstats-gsoc/gsoc2017/wiki/Graphical-Models-for-Mixed-Multi-Modal-Data}.
 }
 \details{
-Use the RcppArmadillo and Rcpp to integrate C++ and R, and use the C++ lib liblbfgs to optimaze the objective function of Poisson regression with L1 penalization.
+Use the RcppArmadillo and Rcpp to integrate C++ and R, and use the C++ lib liblbfgs to optimize the objective function of Poisson regression with L1 penalization.
 
 
 The most important function of this package is glmPR. It accept the input matrix and the response vector as the arguments, like glmPR(x, y) or glmPR::glmPR(y ~ x). The return object contains the coefficient of model. You can also set the parameter "s" in function glmPR to blance the funtion F(x) and the L1-norm.
