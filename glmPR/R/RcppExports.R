@@ -4,20 +4,3 @@
 glmPR <- function(X, y, s = 0.0) {
     .Call('glmPR_glmPR', PACKAGE = 'glmPR', X, y, s)
 }
-
-rcpparma_hello_world <- function() {
-    .Call('glmPR_rcpparma_hello_world', PACKAGE = 'glmPR')
-}
-
-rcpparma_outerproduct <- function(x) {
-    .Call('glmPR_rcpparma_outerproduct', PACKAGE = 'glmPR', x)
-}
-
-rcpparma_innerproduct <- function(x) {
-    .Call('glmPR_rcpparma_innerproduct', PACKAGE = 'glmPR', x)
-}
-
-rcpparma_bothproducts <- function(x) {
-    .Call('glmPR_rcpparma_bothproducts', PACKAGE = 'glmPR', x)
-}
-

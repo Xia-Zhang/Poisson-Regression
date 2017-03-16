@@ -4,11 +4,9 @@ importFrom(Rcpp, evalCpp)
 importFrom("stats", "coef", "fitted", "model.frame", "model.matrix", "model.response", "printCoefmat", "pt")
 importFrom("utils", "packageDescription", "package.skeleton")
 
-export("glmPR", "rcpparma_hello_world", "rcpparma_outerproduct", "rcpparma_innerproduct", "rcpparma_bothproducts")
+export("glmPR")
 
 S3method("glmPR", "default")
 S3method("glmPR", "formula")
 S3method("predict", "glmPR")
 S3method("print", "glmPR")
-S3method("summary", "glmPR")
-S3method("print", "summary.glmPR")
