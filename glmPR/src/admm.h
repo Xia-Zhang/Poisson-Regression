@@ -5,8 +5,7 @@
 
 class ADMM{
 public:
-	ADMM(const arma::mat &data, const arma::vec labels);
-	~ADMM();
+	ADMM(const arma::mat &data, const arma::vec &labels);
 	void train();
 	void updateX();
 	void updateZ();
@@ -15,13 +14,17 @@ public:
 	void softThreshold(double k, arma::vec &A);
 	bool stopCriteria();
 
+	void setLambda(double l);
+	void setRho(double r);
+	void setMaxloop(int m);
+
 private:
 	arma::mat x;	// dataNum * featuresNum
 	arma::vec z;	// featuresNum
 	arma::vec preZ;
 	arma::mat u;	// dataNum * featuresNum
-	double lambda;
-	double rho;
+	double lambda;	// L1 trade off
+	double rho;		// Lagrange ratio
 	double epsAbs;
 	double epsRel;
 

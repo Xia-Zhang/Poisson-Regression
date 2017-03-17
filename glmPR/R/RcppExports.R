@@ -4,3 +4,4 @@
 glmPR <- function(X, y, s = 0.0) {
     .Call('glmPR_glmPR', PACKAGE = 'glmPR', X, y, s)
 }
+

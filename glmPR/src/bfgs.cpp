@@ -4,8 +4,9 @@
 #include "bfgs.h"
 
 BFGS::BFGS(double rho) {
-	// , double epsilon = 1e-5, in maxLoop = 1e5
 	this->rho = rho;
+	epsilon = 1e-5;
+	maxLoop = 10;
 }
 
 arma::vec BFGS::optimize(arma::vec originX, double originY, arma::vec Z, arma::vec U) {
@@ -15,20 +16,18 @@ arma::vec BFGS::optimize(arma::vec originX, double originY, arma::vec Z, arma::v
 	this->Z = Z;
 	int featuresNum = originX.n_elem;
 
-	int iter = 0, m, mk;
+	int iter = 0, m = 0, mk = 0;
 	arma::mat Bk(featuresNum, featuresNum, arma::fill::eye);
-	arma::vec x0, x, detak, yk, gk, pk;
-	double beta = 0.55, sigma = 0.4;
+	arma::vec x0(featuresNum, arma::fill::ones) , x, detak, yk, gk, pk;
+	double beta = 0.55, sigma = 0.4;	// lambda = beta^mk
 
 	while (iter < maxLoop) {
 		gk = g(x0);
 		if (norm(gk) < epsilon) {
 			break;
 		}
-		pk = -1.0 * arma::solve(Bk, gk);
-		
-		m = 0;
-		mk = 0;
+		pk = -1.0 * arma::solve(Bk, gk);	
+	
 		while (m < 20) {
 			if (f(x0 + pow(beta, m)*pk) <= f(x0) + sigma * pow(beta, m) * arma::dot(gk, pk) ) {
 				mk = m;
@@ -36,6 +35,7 @@ arma::vec BFGS::optimize(arma::vec originX, double originY, arma::vec Z, arma::v
 			}
 			m += 1;
 		}
+
 		x = x0 + pow(beta, mk) * pk;
 		detak = x - x0;
 		yk = g(x) - gk;
@@ -43,11 +43,13 @@ arma::vec BFGS::optimize(arma::vec originX, double originY, arma::vec Z, arma::v
 		if (arma::dot(detak, yk) > 0) {
 			double ydeta = arma::dot(yk, detak);
 			double detaBdeta = arma::dot(detak, (Bk * detak));
-
-			Bk = Bk + (yk * yk.t()) / ydeta - (Bk * detak * detak.t() * Bk) / detak;
+			(yk * yk.t()) / ydeta;
+			Bk * detak * detak.t() * Bk;
+			Bk = Bk + (yk * yk.t()) / ydeta - (Bk * detak * detak.t() * Bk) / detaBdeta;
 		}
 
-		iter += 1;
+		iter++;
+		// Rcpp::Rcout << x;
 		x0 = x;
 	}
 	return x0;
@@ -60,5 +62,5 @@ double BFGS::f(arma::vec x) {
 
 arma::vec BFGS::g(arma::vec x) {
 	double tmp = dot(originX, x);
-	return originX * tmp - originY * originX + rho * (x + Z - U);
+	return originX * exp(tmp) - originY * originX + rho * (x + Z - U);
 }

@@ -1,44 +1,59 @@
 #include "admm.h"
 #include "bfgs.h"
 
-ADMM::ADMM(const arma::mat &data, const arma::vec labels) {
-	// arma::vec labels, int maxLoop = 20, double lambda = 1.0, double rho = 1.0
-	dataNum = data.n_cols;
-	featuresNum = data.n_rows;
+ADMM::ADMM(const arma::mat &data, const arma::vec &labels) {
+	dataNum = data.n_rows;
+	featuresNum = data.n_cols;
 
 	this->data = data;
 	this->labels = labels;
-	x.set_size(dataNum, featuresNum);
-	z.set_size(featuresNum);
-	preZ.set_size(featuresNum);
-	u.set_size(dataNum, featuresNum);
 
-	this->maxLoop = maxLoop;
-	this->lambda = lambda;
-	this->rho = rho;
+	x.set_size(dataNum, featuresNum);
+	x.ones();
+	z.set_size(featuresNum);
+	z.ones();
+	preZ.set_size(featuresNum);
+	preZ.ones();
+	u.set_size(dataNum, featuresNum);
+	u.ones();
+
+	lambda = 1.0;
+	rho = 1.0;
 	epsAbs = 1e-4;
 	epsRel = 1e-2;
+	maxLoop = 3;
 }
 
-ADMM::~ADMM() {
+void ADMM::setLambda(double l) {
+	this->lambda = l;
+}
+
+void ADMM::setRho(double r) {
+	this->rho = r;
+}
+
+void ADMM::setMaxloop(int m) {
+	this->maxLoop = m;
 }
 
 void ADMM::train() {
 	int iter = 0;
 	while (iter < maxLoop) {
+		Rcpp::Rcout << "#" << iter << std::endl;
 		updateX();
 		updateZ();
 		updateU();
 		if (stopCriteria() == true) {
 			break;
 		}
+		iter++;
 	}
 }
 
 void ADMM::updateX() {
 	BFGS bfgs(rho);
 	for (int i = 0; i < dataNum; i++) {
-		arma::vec in = data.row(i);
+		arma::vec in = data.row(i).t();
 		double out = labels(i);
 		x.row(i) = (bfgs.optimize(in, out, z, u.row(i).t())).t();
 	}
@@ -46,14 +61,15 @@ void ADMM::updateX() {
 
 void ADMM::updateZ() {
 	preZ = z;
-	z = arma::sum(x, 0) + arma::sum(u, 0)/dataNum;
+	z = ((arma::sum(x, 0) + arma::sum(u, 0))/dataNum).t();
 	softThreshold(lambda / (rho * dataNum), z);
+	// Rcpp::Rcout << z;
 }
 
 void ADMM::updateU() {
 	// TODO: change to distributed compute
 	for (int i = 0; i < dataNum; i++) {
-		u.row(i) = u.row(i) + x.row(i) - z;
+		u.row(i) = u.row(i) + x.row(i) - z.t();
 	}
 }
 
@@ -62,7 +78,7 @@ arma::vec ADMM::getZ() {
 }
 
 void ADMM::softThreshold(double k, arma::vec &A) {
-	for (int i = 0; i < A.n_elem; ++i) {
+	for (int i = 0; i < A.n_elem; i++) {
 		if (A[i] > k) {
 			A[i] -= k;
 		}
@@ -74,7 +90,7 @@ void ADMM::softThreshold(double k, arma::vec &A) {
 		}
 	}
 }
-// rmadillo is a well written C++ library, where the matrix objects are properly destroyed
+// Armadillo is a well written C++ library, where the matrix objects are properly destroyed
 
 bool ADMM::stopCriteria() {
 	double normX, normZ, normY, epsPri, epsDual, normR, normS;
@@ -82,8 +98,8 @@ bool ADMM::stopCriteria() {
 	normX = arma::norm(arma::sum(x, 0) / dataNum);
 	normZ = arma::norm(z);
 	normY = arma::norm(arma::sum(rho * u, 0) / dataNum);
-	s = rho * (z - preZ);
-	r = arma::sum(x, 0) / dataNum + z;
+	s = rho * (-1) * (z - preZ);
+	r = (arma::sum(x, 0)).t() / dataNum + z;
 	normS = arma::norm(s);
 	normR = arma::norm(r);
 	epsPri = sqrt(featuresNum) * epsAbs + epsRel * (normX > normZ ? normX : normZ);

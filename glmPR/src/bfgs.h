@@ -6,11 +6,10 @@
 class BFGS{
 public:
 	BFGS(double rho);
-	~BFGS();
 	arma::vec optimize(arma::vec originX, double originY, arma::vec Z, arma::vec U);
 
 private:
-	double rho;
+	double rho;		//Lagrange ratio
 	double epsilon;
 	int maxLoop;
 	arma::vec Z;
