@@ -17,11 +17,11 @@ ADMM::ADMM(const arma::mat &data, const arma::vec &labels) {
 	u.set_size(dataNum, featuresNum);
 	u.ones();
 
-	lambda = 0.2;
-	rho = 1.0;
+	lambda = 1;
+	rho = 0.5;
 	epsAbs = 1e-4;
 	epsRel = 1e-2;
-	maxLoop = 20;
+	maxLoop = 50;
 }
 
 void ADMM::setLambda(double l) {
@@ -38,50 +38,39 @@ void ADMM::setMaxloop(int m) {
 
 void ADMM::train() {
 	int iter = 0;
+	testt(data, labels, z);
 	while (iter < maxLoop) {
-		// Rcpp::Rcout << "#" << iter << std::endl;
 		updateX();
-		// Rcpp::Rcout << "#" << x << std::endl;
 		updateZ();
-		// Rcpp::Rcout << "#" << z << std::endl;
 		updateU();
-		// Rcpp::Rcout << "#" << u << std::endl;
 		if (stopCriteria() == true) {
 			break;
 		}
+		testt(data, labels, z);
 		iter++;
 	}
 }
 
 void ADMM::updateX() {
-	// Rcpp::Rcout << "Before X: " << x << std::endl;
 	BFGS bfgs(rho);
 	for (int i = 0; i < dataNum; i++) {
 		arma::vec in = data.row(i).t();
 		double out = labels(i);
-		// Rcpp::Rcout << in << " " << out << " " << z << " " << u.row(i).t() << std::endl;
 		x.row(i) = (bfgs.optimize(in, out, z, u.row(i).t())).t();
 	}
-	// Rcpp::Rcout << "After X: " << x << std::endl;
 }
 
 void ADMM::updateZ() {
-	// Rcpp::Rcout << "Before Z: " << z << std::endl;
 	preZ = z;
 	z = ((arma::sum(x, 0) + arma::sum(u, 0))/dataNum).t();
-	// Rcpp::Rcout << "Inner Z: " << z << std::endl;
+	// TODO reduceAll
 	softThreshold(lambda / (rho * dataNum), z);
-	// Rcpp::Rcout << "After Z: " << z << std::endl;
-	Rcpp::Rcout << z << std::endl;
 }
 
 void ADMM::updateU() {
-	// TODO: change to distributed compute
-	// Rcpp::Rcout << "Before U: " << u << std::endl;
 	for (int i = 0; i < dataNum; i++) {
 		u.row(i) = u.row(i) + x.row(i) - z.t();
 	}
-	// Rcpp::Rcout << "After U: " << u << std::endl;
 }
 
 arma::vec ADMM::getZ() {
@@ -101,22 +90,40 @@ void ADMM::softThreshold(double k, arma::vec &A) {
 		}
 	}
 }
-// Armadillo is a well written C++ library, where the matrix objects are properly destroyed
 
 bool ADMM::stopCriteria() {
 	double normX, normZ, normY, epsPri, epsDual, normR, normS;
 	arma::vec s, r;
-	normX = arma::norm(arma::sum(x, 0) / dataNum);
+	// TODO reduceAll
+	normX = calcuSqure(x);
 	normZ = arma::norm(z);
-	normY = arma::norm(arma::sum(rho * u, 0) / dataNum);
+	arma::mat y = u * rho;
+	normY = calcuSqure(y);
+
 	s = rho * (-1) * (z - preZ);
-	r = (arma::sum(x, 0)).t() / dataNum - z;
-	normS = arma::norm(s);
-	normR = arma::norm(r);
-	epsPri = sqrt(featuresNum) * epsAbs + epsRel * (normX > normZ ? normX : (normZ > 0) ? normZ : 0);
+	normS = sqrt(dataNum) * arma::norm(s);
+	normR = calcuSqureMinus(x, z);
+
+	epsPri = sqrt(dataNum) * epsAbs + epsRel * (normX > sqrt(dataNum) * normZ ? normX : sqrt(dataNum) * normZ);
 	epsDual = sqrt(dataNum) * epsAbs + epsRel * normY;
 	if (normR <= epsPri && normS <= epsDual) {
 		return true;
 	}
 	return false;
+}
+
+double ADMM::calcuSqure(arma::mat &A) {
+	double ans = 0.0;
+	for (int i = 0; i < A.n_rows; i++) {
+		ans += arma::dot(A.row(i), A.row(i));
+	}
+	return sqrt(ans);
+}
+
+double ADMM::calcuSqureMinus(arma::mat &A, arma::vec &v) {
+	double ans = 0.0;
+	for (int i = 0; i < A.n_rows; i++) {
+		ans += arma::dot((A.row(i).t() - v), (A.row(i).t() - v));
+	}
+	return sqrt(ans);
 }

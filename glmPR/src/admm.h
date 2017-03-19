@@ -11,8 +11,6 @@ public:
 	void updateZ();
 	void updateU();
 	arma::vec getZ();
-	void softThreshold(double k, arma::vec &A);
-	bool stopCriteria();
 
 	void setLambda(double l);
 	void setRho(double r);
@@ -33,6 +31,11 @@ private:
 	int dataNum;
 	arma::mat data;
 	arma::vec labels;
+
+	void softThreshold(double k, arma::vec &A);
+	bool stopCriteria();
+	double calcuSqure(arma::mat &A);
+	double calcuSqureMinus(arma::mat &A, arma::vec &v);
 };
 
 #endif
