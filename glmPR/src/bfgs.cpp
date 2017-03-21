@@ -11,12 +11,12 @@ BFGS::BFGS(double rho) {
 	maxLoop = 1e5;
 }
 
-arma::vec BFGS::optimize(arma::vec originX, double originY, arma::vec Z, arma::vec U) {
+arma::vec BFGS::optimize(arma::mat originX, arma::vec originY, arma::vec Z, arma::vec U) {
 	this->originY = originY;
 	this->originX = originX;
 	this->U = U;
 	this->Z = Z;
-	int featuresNum = originX.n_elem;
+	int featuresNum = originX.n_cols;
 
 	int iter = 0, m = 0, mk = 0;
 	arma::mat Bk(featuresNum, featuresNum, arma::fill::eye);
@@ -28,7 +28,6 @@ arma::vec BFGS::optimize(arma::vec originX, double originY, arma::vec Z, arma::v
 			break;
 		}
 		pk = -1.0 * arma::solve(Bk, gk);	
-		
 		while (m < 20) {
 			if (f(x0 + pow(beta, m)*pk) < f(x0) + sigma * pow(beta, m) * arma::dot(gk, pk) ) {
 				mk = m;
@@ -57,11 +56,23 @@ arma::vec BFGS::optimize(arma::vec originX, double originY, arma::vec Z, arma::v
 }
 
 double BFGS::f(arma::vec x) {
-	double tmp = arma::dot(originX, x);
-	return exp(tmp) - originY * tmp + rho / 2 * arma::dot((x - Z + U), (x - Z + U));
+	double ans = 0.0, tmp;
+	for (int i = 0; i < originX.n_rows; i++) {
+		tmp = arma::dot(originX.row(i), x);
+		ans += exp(tmp) - originY[i] * tmp;
+	}
+	ans /= originX.n_rows;
+	return ans + rho / 2 * arma::dot((x - Z + U), (x - Z + U));
 }
 
 arma::vec BFGS::g(arma::vec x) {
-	double tmp = dot(originX, x);
-	return originX * exp(tmp) - originY * originX + rho * (x - Z + U);
+	double tmp;
+	arma::rowvec ans(x.n_elem);
+	ans.zeros();
+	for (int i = 0; i < originX.n_rows; i++) {
+		tmp = arma::dot(originX.row(i), x);
+		ans = ans + originX.row(i) * exp(tmp) - originY[i] * originX.row(i);
+	}
+	ans /= originX.n_rows;
+	return ans.t() + rho * (x - Z + U);
 }
