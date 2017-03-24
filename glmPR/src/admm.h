@@ -15,6 +15,7 @@ public:
 	void setLambda(double l);
 	void setRho(double r);
 	void setMaxloop(int m);
+	void setThreadNumber(int n);
 
 private:
 	arma::mat x;	// procN * featuresNum

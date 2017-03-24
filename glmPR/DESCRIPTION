@@ -11,3 +11,4 @@ Description: More about what it does (maybe more than
 License: What license is it under?
 Imports: Rcpp (>= 0.12.9)
 LinkingTo: Rcpp, RcppArmadillo
+Suggests: testthat

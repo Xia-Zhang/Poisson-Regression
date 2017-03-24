@@ -22,16 +22,18 @@ glmPRWork <- function(X, y, s) {
 glmPR <- function(X, ...) UseMethod("glmPR")
 
 glmPR.default <- function(X, y, s = 0.0, ...) {
+    X <- as.matrix(X)
     X <- cbind(1, X)
+    y <- matrix(y, ncol = 1)
     glmPRWork(X, y, s)
 }
 
 # Use the form of RcppArmadillo fastLM to present the print and summary of glmPR class.
 
 print.glmPR <- function(x, ...) {
-    cat("\nCall:\n")
+    print("\nCall:\n")
     print(x$call)
-    cat("\nCoefficients:\n")
+    print("\nCoefficients:\n")
     print(round(x$coefficients, 6))
 }
 

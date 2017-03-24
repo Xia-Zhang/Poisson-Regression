@@ -1,5 +1,6 @@
 #include <RcppArmadillo.h>
 #include <cmath>
+#include <omp.h>
 #include "admm.h"
 using namespace Rcpp;
 
