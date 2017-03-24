@@ -39,10 +39,9 @@ Eddelbuettel, Dirk (2013) Seamless R and C++ Integration with
 % }
 \examples{
 # ~~ simple examples of the most important functions ~~
-x <- matrix( c(2, 4, 3, 5, 5, 7), nrow=3)
-y <- c(1.2, 1.8, 2.1)
-glmPR::glmPR(x, y)
-glmPR::glmPR(y ~ x)
-fit <- glmPR::glmPR(x, y, s = 1.0)	
-predict(fit, newx = x[1:2,])
+x <- matrix(rnorm(100), ncol = 4)
+y <- rpois(25, 3)
+fit <- glmPR(x, y)
+predict(fit, x[1:3,])
+
 }

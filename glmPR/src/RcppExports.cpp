@@ -7,15 +7,16 @@
 using namespace Rcpp;
 
 // glmPR
-List glmPR(const arma::mat& X, const arma::colvec& y, double s);
-RcppExport SEXP glmPR_glmPR(SEXP XSEXP, SEXP ySEXP, SEXP sSEXP) {
+List glmPR(const arma::mat& X, const arma::colvec& y, double s, int threadNum);
+RcppExport SEXP glmPR_glmPR(SEXP XSEXP, SEXP ySEXP, SEXP sSEXP, SEXP threadNumSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const arma::colvec& >::type y(ySEXP);
     Rcpp::traits::input_parameter< double >::type s(sSEXP);
-    rcpp_result_gen = Rcpp::wrap(glmPR(X, y, s));
+    Rcpp::traits::input_parameter< int >::type threadNum(threadNumSEXP);
+    rcpp_result_gen = Rcpp::wrap(glmPR(X, y, s, threadNum));
     return rcpp_result_gen;
 END_RCPP
 }

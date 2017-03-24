@@ -5,7 +5,7 @@
 
 class ADMM{
 public:
-	ADMM(const arma::mat &data, const arma::vec &labels);
+	ADMM(const arma::mat &data, const arma::vec &labels, double s, int threadNum);
 	void train();
 	void updateU(int node);
 	void updateX(int node);
@@ -20,13 +20,10 @@ public:
 private:
 	arma::mat x;	// procN * featuresNum
 	arma::mat u;	// procN * featuresNum
+	arma::mat w;	// procN * featuresNum
 	arma::vec z;	// featuresNum
 	arma::vec preZ;
-	arma::vec w;
 
-	double t;
-	double tx;
-	double ty;
 	double lambda;	// L1 trade off
 	double rho;		// Lagrange ratio
 	double epsAbs;
@@ -40,7 +37,7 @@ private:
 	arma::vec labels;
 
 	void softThreshold(double k, arma::vec &A);
-	bool stopCriteria();
+	bool stopCriteria(double t, double tx, double ty);
 };
 
 #endif

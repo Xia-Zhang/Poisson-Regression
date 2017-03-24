@@ -2,19 +2,22 @@
 #include "bfgs.h"
 #include <omp.h>
 
-ADMM::ADMM(const arma::mat &data, const arma::vec &labels) {
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::plugins(openmp)]]
+
+ADMM::ADMM(const arma::mat &data, const arma::vec &labels, double s, int threadNum) {
 	dataNum = data.n_rows;
 	featuresNum = data.n_cols;
 
 	this->data = data;
 	this->labels = labels;
 
-	lambda = 0;
-	rho = 0.5;
+	rho = 1;
 	epsAbs = 1e-4;
 	epsRel = 1e-2;
 	maxLoop = 50;
-	procN = 4;
+	setThreadNumber(threadNum);
+	setLambda(s);
 
 	x.set_size(procN, featuresNum);
 	x.ones();
@@ -24,7 +27,8 @@ ADMM::ADMM(const arma::mat &data, const arma::vec &labels) {
 	preZ.ones();
 	u.set_size(procN, featuresNum);
 	u.ones();
-	w.set_size(featuresNum);
+	w.set_size(procN, featuresNum);
+	w.zeros();
 }
 
 void ADMM::setLambda(double l) {
@@ -41,40 +45,31 @@ void ADMM::setMaxloop(int m) {
 
 void ADMM::setThreadNumber(int n) {
 	if (n <= 0) {
-		Rcpp::stop("The thread number should more that 0.");
+		Rcpp::stop("the thread number shouldn't be 0 or less");
 	}
 	this->procN = n;
 }
 
-void testt(arma::mat data, arma::vec labels, arma::vec z) {
-	double ans = 0.0;
-	for (int i = 0; i < data.n_rows; i++) {
-		ans += pow(exp(arma::dot(data.row(i), z)) - labels[i], 2);
-	}
-	//Rcpp::Rcout << "The MSE is " << ans << std::endl;
-}
-
 void ADMM::train() {
 	int iter = 0;
+	double t, tx, ty;
+
 	omp_set_num_threads(procN);
-	testt(data, labels, z);
 	while (iter < maxLoop) {
-		w.zeros();
 		t = tx = ty = 0.0;
-		#pragma omp for reduction(+ : w, t, tx, ty)
+		#pragma omp parallel for reduction(+ : t, tx, ty)
 			for (int node = 0; node < procN; node++) {
 				updateU(node);
 				updateX(node);
-				w += x.row(node).t() + u.row(node).t();
+				w.row(node) = x.row(node) + u.row(node);
 				t += arma::dot(x.row(node).t() - z, x.row(node).t() - z);
 				tx += arma::dot(x.row(node).t(), x.row(node).t());
 				ty += arma::dot(rho * u.row(node), rho * u.row(node));
 			}
 		updateZ();
-		if (stopCriteria() == true) {
+		if (stopCriteria(t, tx, ty) == true) {
 			break;
 		}
-		testt(data, labels, z);
 		iter++;
 	}
 }
@@ -96,7 +91,7 @@ void ADMM::updateX(int node) {
 
 void ADMM::updateZ() {
 	preZ = z;
-	z = w / procN;
+	z = (sum(w)).t() / procN;
 	softThreshold(lambda / (rho * procN), z);
 }
 
@@ -118,8 +113,7 @@ void ADMM::softThreshold(double k, arma::vec &A) {
 	}
 }
 
-bool ADMM::stopCriteria() {
-	// w, t, tx, ty 
+bool ADMM::stopCriteria(double t, double tx, double ty) {
 	double normX, normZ, normY, epsPri, epsDual, normR, normS;
 	arma::vec s;
 
@@ -133,7 +127,6 @@ bool ADMM::stopCriteria() {
 
 	epsPri = sqrt(dataNum) * epsAbs + epsRel * (normX > sqrt(procN) * normZ ? normX : sqrt(procN) * normZ);
 	epsDual = sqrt(dataNum) * epsAbs + epsRel * normY;
-	//Rcpp::Rcout << normR << " " << epsPri << " " << normS << " " << epsDual << std::endl;
 	if (normR <= epsPri && normS <= epsDual) {
 		return true;
 	}
