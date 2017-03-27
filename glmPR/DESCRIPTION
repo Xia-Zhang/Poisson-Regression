@@ -5,8 +5,8 @@ Version: 1.0
 Date: 2017-03-05
 Author: Xia Zhang
 Maintainer: Xia Zhang <zhangxia9403@gmail.com>
-Description: Implementation of L1-penalized Poisson Regression
-License: GPL >= 2
+Description: Implementation of L1-penalized Poisson Regression.
+License: GPL-2
 Imports: Rcpp (>= 0.12.9)
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: testthat

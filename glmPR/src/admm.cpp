@@ -1,3 +1,4 @@
+#define ARMA_DONT_PRINT_ERRORS
 #include "admm.h"
 #include "bfgs.h"
 #include <omp.h>
@@ -8,7 +9,6 @@
 ADMM::ADMM(const arma::mat &data, const arma::vec &labels, double s, int threadNum) {
 	dataNum = data.n_rows;
 	featuresNum = data.n_cols;
-
 	this->data = data;
 	this->labels = labels;
 
@@ -18,17 +18,20 @@ ADMM::ADMM(const arma::mat &data, const arma::vec &labels, double s, int threadN
 	maxLoop = 50;
 	setThreadNumber(threadNum);
 	setLambda(s);
-
-	x.set_size(procN, featuresNum);
-	x.ones();
-	z.set_size(featuresNum);
-	z.ones();
-	preZ.set_size(featuresNum);
-	preZ.ones();
-	u.set_size(procN, featuresNum);
-	u.ones();
-	w.set_size(procN, featuresNum);
-	w.zeros();
+	try{
+		x.set_size(procN, featuresNum);
+		x.ones();
+		z.set_size(featuresNum);
+		z.ones();
+		preZ.set_size(featuresNum);
+		preZ.ones();
+		u.set_size(procN, featuresNum);
+		u.ones();
+		w.set_size(procN, featuresNum);
+		w.zeros();
+	} catch(...) {
+		Rcpp::stop("memory allocation failed");
+	}
 }
 
 void ADMM::setLambda(double l) {
