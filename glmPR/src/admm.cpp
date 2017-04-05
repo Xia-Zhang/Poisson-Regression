@@ -103,7 +103,7 @@ arma::vec ADMM::getZ() {
 }
 
 void ADMM::softThreshold(double k, arma::vec &A) {
-	for (int i = 0; i < A.n_elem; i++) {
+	for (unsigned int i = 0; i < A.n_elem; i++) {
 		if (A[i] > k) {
 			A[i] -= k;
 		}

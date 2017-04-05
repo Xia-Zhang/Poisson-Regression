@@ -57,7 +57,7 @@ arma::vec BFGS::optimize(arma::mat originX, arma::vec originY, arma::vec Z, arma
 
 double BFGS::f(arma::vec x) {
 	double ans = 0.0, tmp;
-	for (int i = 0; i < originX.n_rows; i++) {
+	for (unsigned int i = 0; i < originX.n_rows; i++) {
 		tmp = arma::dot(originX.row(i), x);
 		ans += exp(tmp) - originY[i] * tmp;
 	}
@@ -69,7 +69,7 @@ arma::vec BFGS::g(arma::vec x) {
 	double tmp;
 	arma::rowvec ans(x.n_elem);
 	ans.zeros();
-	for (int i = 0; i < originX.n_rows; i++) {
+	for (unsigned int i = 0; i < originX.n_rows; i++) {
 		tmp = arma::dot(originX.row(i), x);
 		ans = ans + originX.row(i) * exp(tmp) - originY[i] * originX.row(i);
 	}

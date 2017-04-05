@@ -39,8 +39,8 @@ test_that("glmPR stops when thread number is less than 1",{
 	expect_error(glmPR(x, y, 0.1, 0), "the thread number shouldn't be 0 or less")
 })
 
-test_that("glmPR stops when memory allocation failed", {
-	x <- matrix(rnorm(1000), nrow = 2)
-	y <- c(1, 2)
-	expect_error(glmPR(x, y, 0.1, 1e6), "memory allocation failed")
-})
+# test_that("glmPR stops when memory allocation failed", {
+# 	x <- matrix(rnorm(1000), nrow = 2)
+# 	y <- c(1, 2)
+# 	expect_error(glmPR(x, y, 0.1, 1e6), "memory allocation failed")
+# })
