@@ -8,7 +8,7 @@
 BFGS::BFGS(double rho) {
 	this->rho = rho;
 	epsilon = 1e-5;
-	maxLoop = 1e5;
+	maxLoop = 20;
 }
 
 arma::vec BFGS::optimize(arma::mat originX, arma::vec originY, arma::vec Z, arma::vec U) {
@@ -24,6 +24,7 @@ arma::vec BFGS::optimize(arma::mat originX, arma::vec originY, arma::vec Z, arma
 	double beta = 0.55, sigma = 0.4;
 	while (iter < maxLoop) {
 		gk = g(x0);
+		// Rcpp::Rcout<<norm(gk) << std::endl;
 		if (norm(gk) < epsilon) {
 			break;
 		}

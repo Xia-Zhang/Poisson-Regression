@@ -6,7 +6,7 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(openmp)]]
 
-ADMM::ADMM(const arma::mat &data, const arma::vec &labels, double s, int threadNum) {
+ADMM::ADMM(const arma::mat &data, const arma::vec &labels, double lambda, int threadNum) {
 	dataNum = data.n_rows;
 	featuresNum = data.n_cols;
 	this->data = data;
@@ -15,9 +15,9 @@ ADMM::ADMM(const arma::mat &data, const arma::vec &labels, double s, int threadN
 	rho = 1;
 	epsAbs = 1e-4;
 	epsRel = 1e-2;
-	maxLoop = 50;
+	maxLoop = 30;
 	setThreadNumber(threadNum);
-	setLambda(s);
+	setLambda(lambda);
 	try{
 		x.set_size(procN, featuresNum);
 		x.ones();

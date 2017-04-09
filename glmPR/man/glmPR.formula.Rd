@@ -4,14 +4,15 @@
 \alias{glmPR.formula}
 \title{L1-penalized Poisson Regression input formula}
 \usage{
-\method{glmPR}{formula}(formula, data = list(), s = 1, threads = 4, ...)
+\method{glmPR}{formula}(formula, data = list(), lambda = 1, threads = 4,
+  ...)
 }
 \arguments{
 \item{formula}{the formula object}
 
 \item{data}{the data set}
 
-\item{s}{a constant scalar parameter to control the influence of L1-Norm}
+\item{lambda}{a constant scalar parameter to control the influence of L1-Norm}
 
 \item{threads}{the parallelize node number}
 

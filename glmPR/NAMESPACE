@@ -1,8 +1,8 @@
 useDynLib(glmPR, .registration=TRUE)
 
 importFrom(Rcpp, evalCpp)
-importFrom("stats", "coef", "fitted", "model.frame", "model.matrix", "model.response", "printCoefmat", "pt")
-importFrom("utils", "packageDescription", "package.skeleton")
+importFrom("stats", "coef", "fitted", "model.frame", "model.matrix", "model.response")
+
 
 export("glmPR")
 

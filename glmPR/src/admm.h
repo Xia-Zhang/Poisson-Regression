@@ -5,7 +5,7 @@
 
 class ADMM{
 public:
-	ADMM(const arma::mat &data, const arma::vec &labels, double s, int threadNum);
+	ADMM(const arma::mat &data, const arma::vec &labels, double lambda, int threadNum);
 	void train();
 	void updateU(int node);
 	void updateX(int node);

@@ -4,14 +4,14 @@
 \alias{glmPR.default}
 \title{L1-penalized Poisson Regression default function}
 \usage{
-\method{glmPR}{default}(X, y, s = 1, threads = 4, ...)
+\method{glmPR}{default}(X, y, lambda = 1, threads = 4, ...)
 }
 \arguments{
 \item{X}{the input matrix}
 
 \item{y}{the response vector}
 
-\item{s}{a constant scalar parameter to control the influence of L1-Norm}
+\item{lambda}{a constant scalar parameter to control the influence of L1-Norm}
 
 \item{threads}{the parallelize node number}
 

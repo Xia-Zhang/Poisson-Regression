@@ -1,5 +1,5 @@
 
-glmPREasyForm <- function(X, y, s, threads) {
+glmPREasyForm <- function(X, y, lambda, threads) {
     y_nrow <- nrow(y)
     if (is.null(y_nrow)) {
         y_nrow = length(y)
@@ -9,14 +9,14 @@ glmPREasyForm <- function(X, y, s, threads) {
         x_nrow = length(X)
     }
     stopifnot(is.matrix(X), is.numeric(y), y_nrow==x_nrow)
-    .Call('glmPR_glmPR', PACKAGE = 'glmPR', X, y, s, threads)
+    .Call('glmPR_glmPR', PACKAGE = 'glmPR', X, y, lambda, threads)
 }
 
-glmPRWork <- function(X, y, s, threads) {
+glmPRWork <- function(X, y, lambda, threads) {
     X <- as.matrix(X)
     y <- as.numeric(y)
 
-    res <- glmPREasyForm(X, y, s, threads)
+    res <- glmPREasyForm(X, y, lambda, threads)
 
     res$coefficients <- as.vector(res$coefficient)
     names(res$coefficients) <- colnames(X)
@@ -41,7 +41,7 @@ glmPR <- function(X, ...) UseMethod("glmPR")
 #'
 #' @param X the input matrix
 #' @param y the response vector
-#' @param s a constant scalar parameter to control the influence of L1-Norm
+#' @param lambda a constant scalar parameter to control the influence of L1-Norm
 #' @param threads the parallelize node number
 #' @param ... other parameter
 #'
@@ -51,10 +51,10 @@ glmPR <- function(X, ...) UseMethod("glmPR")
 #' y <- rpois(25, 3)
 #' glmPR(x, y, 1.0, 4)
 #'
-glmPR.default <- function(X, y, s = 1.0, threads = 4, ...) {
+glmPR.default <- function(X, y, lambda = 1.0, threads = 4, ...) {
     X <- as.matrix(X)
     X <- cbind(1, X)
-    glmPRWork(X, y, s, threads)
+    glmPRWork(X, y, lambda, threads)
 }
 
 
@@ -69,7 +69,7 @@ print.glmPR <- function(x, ...) {
 #'
 #' @param formula the formula object
 #' @param data the data set
-#' @param s a constant scalar parameter to control the influence of L1-Norm
+#' @param lambda a constant scalar parameter to control the influence of L1-Norm
 #' @param threads the parallelize node number
 #' @param ... other parameter
 #'
@@ -80,12 +80,12 @@ print.glmPR <- function(x, ...) {
 #' glmPR(y ~ x, 1.0, 4)
 #'
 
-glmPR.formula <- function(formula, data = list(), s = 1.0, threads = 4, ...) {
+glmPR.formula <- function(formula, data = list(), lambda = 1.0, threads = 4, ...) {
     mf <- model.frame(formula = formula, data = data)
     x <- model.matrix(attr(mf, "terms"), data = mf)
     y <- model.response(mf)
 
-    res <- glmPRWork(x, y, s, threads, ...)
+    res <- glmPRWork(x, y, lambda, threads, ...)
     res$call <- match.call()
     res$formula <- formula
     res$intercept <- attr(attr(mf, "terms"), "intercept")
