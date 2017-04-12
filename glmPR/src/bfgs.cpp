@@ -8,7 +8,38 @@
 BFGS::BFGS(double rho) {
 	this->rho = rho;
 	epsilon = 1e-5;
-	maxLoop = 20;
+	maxLoop = 1e5;
+}
+
+double BFGS::armijo(arma::vec x0, arma::vec pk) {
+	int m = 0, mk = 0;
+	double beta = 0.55, sigma = 0.4;
+	while (m < 200) {
+		if (f(x0 + pow(beta, m)*pk) <= f(x0) + sigma * pow(beta, m) * arma::dot(g(x0), pk) ) {
+			mk = m;
+			break;
+		}
+		m += 1;
+	}
+	return pow(beta, mk);
+}
+
+double BFGS::wolfe(arma::vec x0, arma::vec pk) {
+	double pRho = 0.25, pSigma = 0.75, a = 0, b = 0xffff, pAlpha = 1;
+	while (true) {
+		if (!(f(x0 + pAlpha*pk) <= f(x0) + pRho * pAlpha * arma::dot(g(x0), pk)) ) {
+			b = pAlpha;
+			pAlpha = (pAlpha + a) / 2;
+			continue;
+		}
+		if (!(arma::dot(g(x0 + pAlpha*pk), pk) >= pSigma * arma::dot(g(x0), pk))) {
+			a = pAlpha;
+			pAlpha = 2 * pAlpha < (b + pAlpha)/2 ? 2 * pAlpha : (b + pAlpha)/2;
+			continue;
+		}
+		break;
+	}
+	return pAlpha;
 }
 
 arma::vec BFGS::optimize(arma::mat originX, arma::vec originY, arma::vec Z, arma::vec U) {
@@ -18,29 +49,21 @@ arma::vec BFGS::optimize(arma::mat originX, arma::vec originY, arma::vec Z, arma
 	this->Z = Z;
 	int featuresNum = originX.n_cols;
 
-	int iter = 0, m = 0, mk = 0;
+	int iter = 0;
 	arma::mat Bk(featuresNum, featuresNum, arma::fill::eye);
-	arma::vec x0(featuresNum, arma::fill::zeros) , x, detak, yk, gk, pk;
-	double beta = 0.55, sigma = 0.4;
+	arma::vec x0(featuresNum, arma::fill::zeros), x, detak, yk, gk, pk;
+
 	while (iter < maxLoop) {
 		gk = g(x0);
-		// Rcpp::Rcout<<norm(gk) << std::endl;
 		if (norm(gk) < epsilon) {
 			break;
 		}
 		pk = -1.0 * arma::solve(Bk, gk);	
-		while (m < 20) {
-			if (f(x0 + pow(beta, m)*pk) < f(x0) + sigma * pow(beta, m) * arma::dot(gk, pk) ) {
-				mk = m;
-				break;
-			}
-			m += 1;
-		}
-		x = x0 + pow(beta, mk) * pk;
+
+		x = x0 + armijo(x0, pk) * pk;
 		if (norm(g(x)) < epsilon) {
 			break;
 		}
-
 		detak = x - x0;
 		yk = g(x) - gk;
 

@@ -12,18 +12,20 @@ Use the [RcppArmadillo](http://arma.sourceforge.net) and Rcpp to integrate C++ a
 You can use the Example below to test the function. Compared to glmnet and glm, 
 seems that still have little difference because of the different optimize algorithm.
 
-#Example
+### Example
 
 ```{r}
-library("glmPR")
 library("glmnet")
+
+library("glmPR")
+# You can also install my package from the github
+library(devtools)
+install_github("Xia-Zhang/Poisson-Regression/glmPR")
 
 x <- matrix(rnorm(500), ncol = 5)
 y <- rpois(100, 3)
 glmPR(x, y, 0.5, 1)
 coef(glmnet(x, y, family = "poisson"), s = 0.5)
-
 glmPR(x, y, 0, 4)
 glm(y ~ x, family = "poisson")
-
 ```

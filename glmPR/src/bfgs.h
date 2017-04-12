@@ -19,7 +19,8 @@ private:
 
 	double f(arma::vec x);
 	arma::vec g(arma::vec x);
-
+	double armijo(arma::vec gk, arma::vec pk);
+	double wolfe(arma::vec gk, arma::vec pk);
 };
 
 #endif
