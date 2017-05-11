@@ -1,0 +1,5 @@
+language: r
+before_install:
+  - cd glmPR
+cache: packages
+sudo: false
