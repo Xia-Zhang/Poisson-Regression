@@ -1,6 +1,9 @@
 glmPR
 ======
 
+[![Build Status](https://travis-ci.org/Xia-Zhang/Poisson-Regression.svg?branch=master)](https://travis-ci.org/Xia-Zhang/Poisson-Regression)
+
+
 L1-penalized Poisson Regression, completed by C++ and Rcpp.
 
 
